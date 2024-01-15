@@ -1,16 +1,23 @@
 package com.example.myapplication.addtasks.ui
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -22,10 +29,13 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import com.example.myapplication.addtasks.ui.model.TaskModel
+
 
 @Composable
 fun TasksScreen(viewModel: TasksViewModel){
@@ -43,7 +53,7 @@ fun TasksScreen(viewModel: TasksViewModel){
         FabDialog(
             Modifier.align(Alignment.BottomEnd),
             onNewTask = { viewModel.onShowDialogClick() })
-        //TasksList(viewModel)
+        TasksList(viewModel)
     }
 
 
@@ -101,6 +111,63 @@ fun AddTasksDialog(
                     Text(text = "Añadir tarea")
                 }
             }
+        }
+    }
+}
+@Composable
+fun TasksList(viewModel: TasksViewModel) {
+    val myTasks: List<TaskModel> = viewModel.tasks
+
+    LazyColumn {
+        //El parámetro opcional key ayuda a optimizar el LazyColumn
+        //Al indicarle que la clave es el id va a ser capaz de identificar cada tarea sin problemas
+        items(myTasks) { task ->
+            ItemTask(
+                task,
+                onTaskRemove = { viewModel.onItemRemove(it) },
+                onTaskCheckChanged = { viewModel.onCheckBoxSelected(it) }
+            )
+        }
+    }
+}
+@Composable
+fun ItemTask (
+    taskModel: TaskModel,
+    onTaskRemove: (TaskModel) -> Unit,
+    onTaskCheckChanged: (TaskModel) -> Unit
+) {
+    Card(
+        //pointerInput es una función se utiliza para configurar la entrada de puntero (input)
+        //para el componente visual al que se le aplica... la detección de gestos de entrada táctil
+        //En nuestro caso queremos eliminar una tarea con el gesto de pulsación larga (onLongPress)
+        //sobre la tarea, por lo tanto el componente visual dónde aplicar el modificador debe ser el Card.
+        //En la expresión lambda no podemos utilizar it como parámetro de la llamada a onTaskRemove(it)
+        //it es el Offset y nosotros necesitamos pasarle el taskModel que debe eliminarse...
+        Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 8.dp)
+            .pointerInput(Unit) {
+                detectTapGestures(onLongPress = {
+                    onTaskRemove(taskModel)
+                })
+            },
+        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
+    ) {
+        Row(
+            Modifier
+                .fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = taskModel.task,
+                modifier = Modifier
+                    .padding(horizontal = 4.dp)
+                    .weight(1f)
+            )
+            Checkbox(
+                checked = taskModel.selected,
+                onCheckedChange = { onTaskCheckChanged(taskModel) }
+            )
         }
     }
 }
