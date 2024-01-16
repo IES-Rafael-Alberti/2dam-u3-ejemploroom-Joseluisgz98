@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Button
@@ -83,20 +84,6 @@ fun TasksScreen(viewModel: TasksViewModel){
             }
         }
     }
-    Box(modifier = Modifier.fillMaxSize()) {
-        AddTasksDialog(
-            show = showDialog,
-            myTaskText = myTaskText,
-            onDismiss = { viewModel.onDialogClose() },
-            onTaskAdded = {viewModel.onTaskCreated() },
-            onTaskTextChanged = { viewModel.onTaskTextChanged(it) }
-        )
-        FabDialog(
-            Modifier.align(Alignment.BottomEnd),
-            onNewTask = { viewModel.onShowDialogClick() })
-        TasksList(uiState,viewModel)
-    }
-
 
 }
 @Composable
