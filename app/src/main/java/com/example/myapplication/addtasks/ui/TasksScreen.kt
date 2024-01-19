@@ -84,7 +84,6 @@ fun TasksScreen(viewModel: TasksViewModel){
             }
         }
     }
-
 }
 @Composable
 fun FabDialog(
@@ -148,8 +147,8 @@ fun TasksList(tasks: List<TaskModel>, viewModel: TasksViewModel) {
         items(tasks, key = { it.id }) { task ->
             ItemTask(
                 task,
-                onTaskRemove = { viewModel.onItemRemove(it) },
-                onTaskCheckChanged = { viewModel.onCheckBoxSelected(it) }
+                onTaskRemove = { viewModel.onItemRemove() },
+                onTaskCheckChanged = { viewModel.onCheckBoxSelected() }
             )
         }
     }

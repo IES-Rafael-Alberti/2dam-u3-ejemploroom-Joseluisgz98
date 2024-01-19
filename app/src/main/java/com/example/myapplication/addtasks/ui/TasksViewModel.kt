@@ -9,7 +9,9 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.myapplication.addtasks.domain.AddTaskUseCase
+import com.example.myapplication.addtasks.domain.DeleteTaskUseCase
 import com.example.myapplication.addtasks.domain.GetTasksUseCase
+import com.example.myapplication.addtasks.domain.UpdateTaskUseCase
 import com.example.myapplication.addtasks.ui.model.TaskModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
@@ -23,7 +25,9 @@ import javax.inject.Inject
 @HiltViewModel
 class TasksViewModel @Inject constructor(
     private val addTaskUseCase: AddTaskUseCase,
-    getTasksUseCase: GetTasksUseCase
+    getTasksUseCase: GetTasksUseCase,
+    private val deleteTaskUseCase: DeleteTaskUseCase,
+    private val updateTaskUseCase: UpdateTaskUseCase
 ): ViewModel() {
     val uiState: StateFlow<TaskUiState> = getTasksUseCase().map(::Success)
         .catch { Error(it) }
@@ -57,9 +61,15 @@ class TasksViewModel @Inject constructor(
     fun onTaskTextChanged(taskText: String) {
         _myTaskText.value = taskText
     }
-    fun onItemRemove(taskModel: TaskModel) {
+    fun onItemRemove() {
+        viewModelScope.launch {
+            deleteTaskUseCase(TaskModel(task = _myTaskText.value ?: ""))
+        }
 
     }
-    fun onCheckBoxSelected(taskModel: TaskModel) {
+    fun onCheckBoxSelected() {
+        viewModelScope.launch {
+            updateTaskUseCase(TaskModel(task = _myTaskText.value ?: ""))
+        }
     }
 }
